@@ -1,0 +1,27 @@
+version: '2.3'
+
+services:
+  server:
+    container_name: server
+    build:
+      context: ./server
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/server
+    ports:
+      - "3001:3001"
+    command: yarn start:prod
+
+  client:
+    container_name: client
+    depends_on:
+      - server
+    build:
+      context: ./client
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/client
+    ports:
+      - "3000:3000"
+    command: yarn start
+    

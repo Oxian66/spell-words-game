@@ -1,0 +1,19 @@
+.wrap {
+  display: grid;
+  grid-template: repeat(7, 1fr) / repeat(7, 1fr);
+}
+
+.cat_animation {
+  animation: 3s infinite alternate slidein;
+}
+
+@keyframes slidein {
+  from {
+    margin-top: 7%;
+  }
+
+  to {
+    margin-bottom: 7%;
+  }
+}
+
