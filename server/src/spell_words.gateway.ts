@@ -14,6 +14,7 @@ import {
 
 import { AppService } from './app.service';
 import { Letter } from './interfaces/letter';
+import { Player } from './interfaces/player';
 
 @WebSocketGateway({ cors: true })
 export class SpellWordsGateway
@@ -23,6 +24,9 @@ export class SpellWordsGateway
   server: Server;
 
   clients: Socket[] = [];
+  
+  playersNames: Player[] = [];
+
   constructor(private readonly appService: AppService) {}
 
   handleConnection(socket: Socket) {
@@ -33,6 +37,7 @@ export class SpellWordsGateway
 
   handleDisconnect(socket: Socket) {
     this.clients = this.clients.filter((client) => client !== socket);
+    this.playersNames = this.playersNames.filter(player => player.id !== socket.id);
     Logger.log('Websocket connection closed');
     Logger.log(`Clients connected: ${this.clients.length}`);
   }
@@ -40,7 +45,8 @@ export class SpellWordsGateway
   @SubscribeMessage('game')
   async startGame(@ConnectedSocket() socket: Socket): Promise<WsResponse<any>> {
     console.log(socket.id);
-    socket.emit('lol');
+    // socket.emit('lol');
+    setTimeout(() => { this.server.emit('players', this.playersNames); }, 1000);
     return {
       data: this.appService.getLetters(),
       event: 'game',
@@ -57,10 +63,19 @@ export class SpellWordsGateway
     socket.emit('user_input', { isCorrect: res.isCorrect, score: res.score });
   }
 
-  // @SubscribeMessage('lock_letter')
-  // async lockLetter(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() letter: Letter
-  // ) {
-  // }
+  @SubscribeMessage('get_player')
+  getPlayer(@ConnectedSocket() socket: Socket, @MessageBody()playerName: string){
+      this.playersNames.push({id: socket.id, playerName});
+      console.log('players', this.playersNames);
+  }
+  
+
+
+  @SubscribeMessage('user_move')
+  async playerTurn (
+    @ConnectedSocket() socket: Socket, 
+  ) {
+    
+    return this.appService
+  }
 }

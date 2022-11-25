@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router';
 import { Toaster } from 'react-hot-toast';
 import openSocket from 'socket.io-client';
 import Login from './components/login/Login';
-import Game from './components/game/Game';
+import Main from './components/main/Main';
 
 export const socket = openSocket('http://localhost:3001');
 socket.on('connect', () => {
@@ -20,7 +20,7 @@ function App() {
     <div className="App">
       <Routes>
         <Route path="/" element={<Login />}></Route>
-        <Route path="/game" element={<Game />}></Route>
+        <Route path="/game" element={<Main />}></Route>
       </Routes>
       <Toaster />
     </div>

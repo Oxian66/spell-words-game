@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Button, Card, Layout, Typography, Spin } from "antd";
 import { useLocation } from "react-router-dom";
 import cl from "./game.module.css";
-
 import toast from "react-hot-toast";
 import { socket } from "../../App";
 interface Letter {
@@ -57,6 +56,7 @@ const Game = (): React.ReactElement => {
       }
     });
     socket.emit("game");
+    socket.emit("get_player", location.state)
   }, []);
 
   useEffect(() => {

@@ -7,6 +7,7 @@ import { Letter } from './interfaces/letter';
 export class AppService {
   alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
   letters = [];
+  score = 0;
 
   constructor() {
     this.startGame();
@@ -21,9 +22,10 @@ export class AppService {
 
   startGame() {
     const buffer = [];
-    for (let i = 0; i < 49; i++)
+    for (let i = 0; i < 64; i++)
       buffer.push(this.generateLetter(this.alphabet));
     this.letters = [...buffer];
+    
   }
 
   getLetters(): string[] {
@@ -33,11 +35,12 @@ export class AppService {
   async processInput(input: Letter[]) {
     const word = input.map((el) => el.value).join('');
     const isCorrect = await this.matchWord(word);
-    let score = 0;
+    //let score = 0;
+    //this.score = 0;
     if (isCorrect) {
-      if (input.length <= 3) score += 1;
-      else if (input.length > 3 && input.length <= 6) score += 2;
-      else score += 3;
+      if (input.length <= 3) this.score += 1;
+      else if (input.length > 3 && input.length <= 6) this.score += 2;
+      else this.score += 3;
       const newLetters = this.letters.map((letter) => {
         if (input.filter((el) => el.id === letter.id).length)
           return this.generateLetter(this.alphabet);
@@ -53,7 +56,7 @@ export class AppService {
     return {
       isCorrect,
       letters: this.letters,
-      score,
+      score: this.score,
     };
   }
 
@@ -61,7 +64,11 @@ export class AppService {
     try {
       const res = await axios
         .get(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-        .then(() => true)
+        .then((r) => {
+          return r.data[0].meanings.filter(
+            (meaning) => meaning.partOfSpeech === 'noun',
+          ).length > 0;
+        })
         .catch(() => false);
       return res;
     } catch (err) {
@@ -69,4 +76,5 @@ export class AppService {
       throw new Error('pizdec polniy');
     }
   }
+
 }

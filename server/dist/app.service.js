@@ -17,6 +17,7 @@ let AppService = class AppService {
     constructor() {
         this.alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
         this.letters = [];
+        this.score = 0;
         this.startGame();
     }
     generateLetter(source) {
@@ -27,7 +28,7 @@ let AppService = class AppService {
     }
     startGame() {
         const buffer = [];
-        for (let i = 0; i < 49; i++)
+        for (let i = 0; i < 64; i++)
             buffer.push(this.generateLetter(this.alphabet));
         this.letters = [...buffer];
     }
@@ -37,14 +38,13 @@ let AppService = class AppService {
     async processInput(input) {
         const word = input.map((el) => el.value).join('');
         const isCorrect = await this.matchWord(word);
-        let score = 0;
         if (isCorrect) {
             if (input.length <= 3)
-                score += 1;
+                this.score += 1;
             else if (input.length > 3 && input.length <= 6)
-                score += 2;
+                this.score += 2;
             else
-                score += 3;
+                this.score += 3;
             const newLetters = this.letters.map((letter) => {
                 if (input.filter((el) => el.id === letter.id).length)
                     return this.generateLetter(this.alphabet);
@@ -62,14 +62,16 @@ let AppService = class AppService {
         return {
             isCorrect,
             letters: this.letters,
-            score,
+            score: this.score,
         };
     }
     async matchWord(word) {
         try {
             const res = await axios_1.default
                 .get(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-                .then(() => true)
+                .then((r) => {
+                return r.data[0].meanings.filter((meaning) => meaning.partOfSpeech === 'noun').length > 0;
+            })
                 .catch(() => false);
             return res;
         }

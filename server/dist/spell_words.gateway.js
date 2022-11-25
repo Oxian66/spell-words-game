@@ -21,6 +21,7 @@ let SpellWordsGateway = class SpellWordsGateway {
     constructor(appService) {
         this.appService = appService;
         this.clients = [];
+        this.playersNames = [];
     }
     handleConnection(socket) {
         this.clients = [...this.clients, socket];
@@ -29,12 +30,13 @@ let SpellWordsGateway = class SpellWordsGateway {
     }
     handleDisconnect(socket) {
         this.clients = this.clients.filter((client) => client !== socket);
+        this.playersNames = this.playersNames.filter(player => player.id !== socket.id);
         common_1.Logger.log('Websocket connection closed');
         common_1.Logger.log(`Clients connected: ${this.clients.length}`);
     }
     async startGame(socket) {
         console.log(socket.id);
-        socket.emit('lol');
+        setTimeout(() => { this.server.emit('players', this.playersNames); }, 1000);
         return {
             data: this.appService.getLetters(),
             event: 'game',
@@ -45,6 +47,13 @@ let SpellWordsGateway = class SpellWordsGateway {
         if (res.isCorrect)
             this.server.emit('update_letters', res.letters);
         socket.emit('user_input', { isCorrect: res.isCorrect, score: res.score });
+    }
+    getPlayer(socket, playerName) {
+        this.playersNames.push({ id: socket.id, playerName });
+        console.log('players', this.playersNames);
+    }
+    async playerTurn(socket) {
+        return this.appService;
     }
 };
 __decorate([
@@ -66,6 +75,21 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, Array]),
     __metadata("design:returntype", Promise)
 ], SpellWordsGateway.prototype, "playerInput", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('get_player'),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __param(1, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, String]),
+    __metadata("design:returntype", void 0)
+], SpellWordsGateway.prototype, "getPlayer", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('user_move'),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket]),
+    __metadata("design:returntype", Promise)
+], SpellWordsGateway.prototype, "playerTurn", null);
 SpellWordsGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({ cors: true }),
     __metadata("design:paramtypes", [app_service_1.AppService])
