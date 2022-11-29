@@ -7,12 +7,12 @@ export declare class SpellWordsGateway implements OnGatewayConnection, OnGateway
     private readonly appService;
     server: Server;
     clients: Socket[];
-    playersNames: Player[];
+    players: Player[];
+    isTurnNow: boolean;
     constructor(appService: AppService);
     handleConnection(socket: Socket): void;
     handleDisconnect(socket: Socket): void;
     startGame(socket: Socket): Promise<WsResponse<any>>;
     playerInput(socket: Socket, message: Letter[]): Promise<void>;
     getPlayer(socket: Socket, playerName: string): void;
-    playerTurn(socket: Socket): Promise<AppService>;
 }

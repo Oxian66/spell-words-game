@@ -8,11 +8,11 @@ import Main from './components/main/Main';
 export const socket = openSocket('http://localhost:3001');
 socket.on('connect', () => {
   console.log('connect new client');
+  socket.emit('whose_turn');
 });
 socket.on('disconnect', () => {
   socket.removeAllListeners();
 })
-
 
 
 function App() {
